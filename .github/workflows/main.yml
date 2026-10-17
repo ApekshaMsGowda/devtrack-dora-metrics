@@ -1,0 +1,37 @@
+name: DevTrack CI Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    name: Validate DevTrack
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install streamlit pandas plotly requests
+
+      - name: Check Python syntax
+        run: |
+          python -m compileall -q app.py
+
+      - name: Validate dataset
+        run: |
+          python -c "import pandas as pd; df = pd.read_csv('data/dora_metrics.csv'); assert not df.empty, 'Dataset is empty'; print('Dataset validation passed:', len(df), 'records')"
